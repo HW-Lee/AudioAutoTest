@@ -16,7 +16,7 @@ packages = [package for package in packages if package.startswith("pyaat")]
 
 install_reqs = [
     "androidviewclient==22.3.1",
-    "numpy==1.20.3",
+    "numpy==1.22.0",
     "scipy==1.7.3",
     "scikit-learn==1.0.2",
     "matplotlib==3.5.3",
