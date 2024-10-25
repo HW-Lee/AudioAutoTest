@@ -29,7 +29,7 @@ install_reqs = [
 
 setuptools.setup(
     name="python-audio-autotest{}".format("" if not is_python_310 else "-3.10"),
-    version="1.5.6",
+    version="1.5.7",
     scripts=[] ,
     author="Hao-Wei Lee",
     author_email="hwinnerlee@gmail.com, hwlee@google.com",

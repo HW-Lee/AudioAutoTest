@@ -1,7 +1,7 @@
 import os
 import platform
 
-__version__ = "1.5.6"
+__version__ = "1.5.7"
 __author__ = "Hao-Wei Lee"
 if platform.system() == "Windows":
     SEP = "\\"

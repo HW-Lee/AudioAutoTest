@@ -6,6 +6,10 @@ This is a auto-testing framework of audio functions for Android devices.
 
 ## Release Note
 ### v1.5
+### v1.5.7
+- Update audioworker.apk (6d15fe8-python-audio-autotest-v1.5.7)
+- Add support to seek during the playback
+
 ### v1.5.6
 - Update the version of scikit-learn for the compatibility of Python 3.11.4
 
