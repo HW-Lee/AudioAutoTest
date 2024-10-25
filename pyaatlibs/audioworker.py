@@ -160,6 +160,16 @@ class AudioWorkerApp(AppInterface):
         __class__.send_intent(device, serialno, name, configs)
 
     @staticmethod
+    def playback_nonoffload_seek_to(device=None, serialno=None, playback_id=0, seek_position_ms=0):
+        name = __class__.AUDIOWORKER_INTENT_PREFIX + "playback.seek"
+        configs = {
+            "type": "non-offload",
+            "playback-id": playback_id,
+            "seek-position-ms" : seek_position_ms
+        }
+        __class__.send_intent(device, serialno, name, configs)
+
+    @staticmethod
     def playback_offload(
         device=None, serialno=None, file="null",
         freqs=[440.], playback_id=0, fs=16000, nch=2, amp=0.6, bit_depth=16):
@@ -173,6 +183,16 @@ class AudioWorkerApp(AppInterface):
             "amplitude": amp,
             "pcm-bit-width": bit_depth,
             "file": file
+        }
+        __class__.send_intent(device, serialno, name, configs)
+
+    @staticmethod
+    def playback_offload_seek_to(device=None, serialno=None, playback_id=0, seek_position_ms=0):
+        name = __class__.AUDIOWORKER_INTENT_PREFIX + "playback.seek"
+        configs = {
+            "type": "offload",
+            "playback-id": playback_id,
+            "seek-position-ms" : seek_position_ms
         }
         __class__.send_intent(device, serialno, name, configs)
 
