@@ -21,7 +21,7 @@ install_reqs = [
     "androidviewclient==22.3.1",
     "numpy==1.20.3" if not is_python_310 else "numpy==1.23.5",
     "scipy==1.7.3" if not is_python_310 else "scipy==1.10.1",
-    "scikit-learn==1.3.0",
+    "scikit-learn==1.0.2" if not is_python_310 else "scikit-learn==1.3.0",
     "matplotlib==3.5.3",
     "librosa==0.9.2",
     "sounddevice==0.4.5"
@@ -29,7 +29,7 @@ install_reqs = [
 
 setuptools.setup(
     name="python-audio-autotest{}".format("" if not is_python_310 else "-3.10"),
-    version="1.5.7",
+    version="1.5.7.post1",
     scripts=[] ,
     author="Hao-Wei Lee",
     author_email="hwinnerlee@gmail.com, hwlee@google.com",
