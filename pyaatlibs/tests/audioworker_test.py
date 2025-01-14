@@ -27,10 +27,7 @@ def serialno(pytestconfig):
 
 @pytest.fixture(scope="session")
 def target_version():
-    try:
-        return pyaatlibs.__version__
-    except:
-        return "1.4.3"  # The first version since the apk had version name
+    return AudioWorkerApp.get_apk_version()
 
 @pytest.fixture(scope="session")
 def skip_version_check(pytestconfig):
@@ -158,19 +155,15 @@ def test_apk_version(check_options, target_version, serialno, skip_version_check
     if skip_version_check:
         pytest.skip("The version check is skipped.")
 
-    out, err = Adb.execute(
-        ["shell", "dumpsys package com.google.audioworker | grep versionName"], serialno=serialno)
-    assert len(err) == 0
-    assert len(out) > 0
+    apk_version = AudioWorkerApp.get_version_from_device(serialno=serialno)
+    assert len(apk_version) > 0
 
-    vname_fmt = "versionName=" \
-        + "(?P<commit_sha>{})\\-python\\-audio\\-autotest\\-v(?P<pyaat_version>{})$".format(
-                SHORT_SHA_FMT, VERSION_FMT)
+    vname_fmt = "(?P<commit_sha>{})\\-python\\-audio\\-autotest\\-v(?P<pyaat_version>{})$".format(
+        SHORT_SHA_FMT, VERSION_FMT)
 
-    m = re.match(vname_fmt, out.strip())
+    m = re.match(vname_fmt, apk_version)
     assert m is not None, "The version name '{}' is not valid.".format(out.strip())
-    print(m.groupdict())
-    assert m.groupdict()["pyaat_version"] >= target_version
+    assert apk_version == target_version
 
 def wait_for_activities(serialno, func, onset=True):
     retry = 10

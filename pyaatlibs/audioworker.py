@@ -63,7 +63,7 @@ class AudioWorkerApp(AppInterface):
 
     @staticmethod
     def get_apk_version():
-        return "c66b90f-python-audio-autotest-v1.5.3"
+        return "47311b4-python-audio-autotest-v1.5.8"
 
     @staticmethod
     def get_version_from_device(serialno=None):
@@ -81,7 +81,8 @@ class AudioWorkerApp(AppInterface):
     def install(child, grant=False, serialno=None, tolog=True):
         super().install(grant=grant, serialno=serialno, tolog=tolog)
         __class__.log(
-            "install: the installed version is '{}'".format(__class__.get_version_from_device()))
+            "install: the installed version is '{}'".format(
+                __class__.get_version_from_device(serialno=serialno)))
 
     @staticmethod
     def get_launch_component():
@@ -143,7 +144,7 @@ class AudioWorkerApp(AppInterface):
     @staticmethod
     def playback_nonoffload(
         device=None, serialno=None,
-        freqs=[440.], playback_id=0, file="null",
+        freqs=[440.], playback_id=0, file="null", stream_type=3,
         fs=16000, nch=2, amp=0.6, bit_depth=16, low_latency_mode=False):
         name = __class__.AUDIOWORKER_INTENT_PREFIX + "playback.start"
         configs = {
@@ -155,7 +156,8 @@ class AudioWorkerApp(AppInterface):
             "amplitude": amp,
             "pcm-bit-width": bit_depth,
             "low-latency-mode": low_latency_mode,
-            "file": file
+            "file": file,
+            "stream-type": stream_type
         }
         __class__.send_intent(device, serialno, name, configs)
 
