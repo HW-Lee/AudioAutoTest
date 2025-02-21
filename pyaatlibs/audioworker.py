@@ -63,7 +63,7 @@ class AudioWorkerApp(AppInterface):
 
     @staticmethod
     def get_apk_version():
-        return "47311b4-python-audio-autotest-v1.5.8"
+        return "068bd43-python-audio-autotest-v1.5.9"
 
     @staticmethod
     def get_version_from_device(serialno=None):
@@ -398,7 +398,7 @@ class AudioWorkerApp(AppInterface):
         return __class__._common_info(device, serialno, "voip", "VoIPController", tolog=tolog)
 
     @staticmethod
-    def voip_start(device=None, serialno=None, rxfreq=440., rxamp=0.6, rxspkr=False,
+    def voip_start(device=None, serialno=None, rxfreq=440., rxamp=0.6, rxspkr=False, rxfile="null",
         rxfs=8000, txfs=8000, rxnch=1, txnch=1, rxbit_depth=16, txbit_depth=16, dump_buffer_ms=0):
         name = __class__.AUDIOWORKER_INTENT_PREFIX + "voip.start"
         configs = {
@@ -408,6 +408,7 @@ class AudioWorkerApp(AppInterface):
             "rx-num-channels": rxnch,
             "rx-pcm-bit-width": rxbit_depth,
             "rx-use-spkr": rxspkr,
+            "rx-file": rxfile,
             "tx-sampling-freq": txfs,
             "tx-num-channels": txnch,
             "tx-pcm-bit-width": txbit_depth,

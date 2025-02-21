@@ -3,6 +3,7 @@ from unittest.mock import MagicMock
 
 import re
 import time
+import packaging.version
 
 import pyaatlibs
 from pyaatlibs.audioworker import AudioWorkerApp, RecordPerf, RecordApi, RecordInputSrc
@@ -522,7 +523,7 @@ def test_single_record(check_options, target_version, skip_function_check, seria
     assert wait_for_record_activities(serialno=serialno, onset=False)
 
 def test_concurrent_record(check_options, target_version, skip_function_check, serialno):
-    if target_version < "1.5":
+    if packaging.version.parse(target_version.split("-")[-1]) < packaging.version.parse("1.5"):
         pytest.skip("This is only for PyAAT later than v1.5")
 
     if skip_function_check:

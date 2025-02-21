@@ -6,6 +6,14 @@ This is a auto-testing framework of audio functions for Android devices.
 
 ## Release Note
 ### v1.5
+### v1.5.9
+- Update audioworker.apk (068bd43-python-audio-autotest-v1.5.9)
+- audioworker: voip: support customized file for VoIP downlink
+
+### v1.5.8
+- Update audioworker.apk (47311b4-python-audio-autotest-v1.5.8)
+- Add stream_type support and ble support
+
 ### v1.5.7
 - Update audioworker.apk (6d15fe8-python-audio-autotest-v1.5.7)
 - Add support to seek during the playback
