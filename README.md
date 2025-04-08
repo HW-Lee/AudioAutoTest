@@ -6,6 +6,9 @@ This is a auto-testing framework of audio functions for Android devices.
 
 ## Release Note
 ### v1.5
+### v1.5.10
+- Fix Adb.get_devices() in case when adb didn't work well by retrying.
+
 ### v1.5.9
 - Update audioworker.apk (068bd43-python-audio-autotest-v1.5.9)
 - audioworker: voip: support customized file for VoIP downlink

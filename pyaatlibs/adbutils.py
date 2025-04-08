@@ -2,6 +2,7 @@ import subprocess
 import threading
 import signal
 import re
+import time
 from pyaatlibs.logger import Logger
 
 class AdbScreenRecordingThread(threading.Thread):
@@ -81,10 +82,22 @@ class Adb(object):
 
     @classmethod
     def get_devices(child, **kwargs):
-        out, _ = child.execute(["devices"], **kwargs)
-        devices = list(map(lambda x: x.strip(), out.splitlines()))
-        del devices[0]
-        devices = [x.split()[0] for x in devices if len(x) > 0 and x.split()[1] == "device"]
+        retry = 60
+        lines = []
+        while retry > 0:
+            out, _ = child.execute(["devices"], **kwargs)
+            lines = [l for l in map(lambda x: x.strip(), out.splitlines()) if len(l) > 0]
+
+            if len(lines) > 0 and lines[0] == "List of devices attached":
+                break
+
+            retry -= 1
+            time.sleep(1)
+
+        if retry == 0:
+            raise(RuntimeError("\"adb device\" might have some problems."))
+
+        devices = [l.split()[0] for l in lines if l.split()[1] == "device"]
         return devices
 
     @classmethod
