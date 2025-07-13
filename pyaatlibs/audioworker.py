@@ -36,6 +36,45 @@ class RecordApi(IntEnum):
     OPENSLES = auto()
     AAUDIO = auto()
 
+class PlaybackStream(IntEnum):
+    VOICE_CALL = 0
+    SYSTEM = auto()
+    RING = auto()
+    MUSIC = auto()
+    ALARM = auto()
+    NOTIFICATION = auto()
+    DTMF = 8
+    ACCESSIBILITY = 10
+
+class PlaybackContentType(IntEnum):
+    UNKNOWN = 0
+    SPEECH = auto()
+    MUSIC = auto()
+    MOVIE = auto()
+    SONIFICATION = auto()
+    ULTRASOUND = 1997
+
+class PlaybackUsage(IntEnum):
+    UNKNOWN = 0
+    MEDIA = auto()
+    VOICE_COMMUNICATION = auto()
+    VOICE_COMMUNICATION_SIGNALLING = auto()
+    ALARM = auto()
+    NOTIFICATION = auto()
+    NOTIFICATION_RINGTONE = auto()
+    NOTIFICATION_EVENT = 10
+    ASSISTANCE_ACCESSIBILITY = auto()
+    ASSISTANCE_NAVIGATION_GUIDANCE = auto()
+    ASSISTANCE_SONIFICATION = auto()
+    GAME = auto()
+    ASSISTANT = auto()
+
+class PlaybackPerformanceMode(IntEnum):
+    NOT_SET = -1
+    NONE = auto()
+    LOW_LATENCY = auto()
+    POWER_SAVING = auto()
+
 class TaskIndex(IntEnum):
     ALL = -1
 
@@ -63,7 +102,7 @@ class AudioWorkerApp(AppInterface):
 
     @staticmethod
     def get_apk_version():
-        return "068bd43-python-audio-autotest-v1.5.9"
+        return "bc49bba-python-audio-autotest-v1.5.11"
 
     @staticmethod
     def get_version_from_device(serialno=None):
@@ -131,7 +170,7 @@ class AudioWorkerApp(AppInterface):
 
             if type(value) is float:
                 cmd_arr += ["--ef", key]
-            elif type(value) is int or type(value) is bool:
+            elif isinstance(value, IntEnum) or type(value) is int or type(value) is bool:
                 cmd_arr += ["--ei", key]
                 value = int(value)
             else:
@@ -144,7 +183,9 @@ class AudioWorkerApp(AppInterface):
     @staticmethod
     def playback_nonoffload(
         device=None, serialno=None,
-        freqs=[440.], playback_id=0, file="null", stream_type=3,
+        freqs=[440.], playback_id=0, file="null",
+        stream_type=PlaybackStream.MUSIC, performance_mode=PlaybackPerformanceMode.NOT_SET,
+        content_type=PlaybackContentType.MUSIC, usage=PlaybackUsage.MEDIA,
         fs=16000, nch=2, amp=0.6, bit_depth=16, low_latency_mode=False):
         name = __class__.AUDIOWORKER_INTENT_PREFIX + "playback.start"
         configs = {
@@ -157,7 +198,10 @@ class AudioWorkerApp(AppInterface):
             "pcm-bit-width": bit_depth,
             "low-latency-mode": low_latency_mode,
             "file": file,
-            "stream-type": stream_type
+            "stream-type": stream_type,
+            "usage": usage,
+            "content-type": content_type,
+            "performance-mode": performance_mode
         }
         __class__.send_intent(device, serialno, name, configs)
 
@@ -173,7 +217,8 @@ class AudioWorkerApp(AppInterface):
 
     @staticmethod
     def playback_offload(
-        device=None, serialno=None, file="null",
+        device=None, serialno=None, file="null", stream_type=PlaybackStream.MUSIC,
+        content_type=PlaybackContentType.MUSIC, usage=PlaybackUsage.MEDIA,
         freqs=[440.], playback_id=0, fs=16000, nch=2, amp=0.6, bit_depth=16):
         name = __class__.AUDIOWORKER_INTENT_PREFIX + "playback.start"
         configs = {
@@ -184,7 +229,10 @@ class AudioWorkerApp(AppInterface):
             "num-channels": nch,
             "amplitude": amp,
             "pcm-bit-width": bit_depth,
-            "file": file
+            "file": file,
+            "stream-type": stream_type,
+            "usage": usage,
+            "content-type": content_type,
         }
         __class__.send_intent(device, serialno, name, configs)
 

@@ -6,6 +6,10 @@ This is a auto-testing framework of audio functions for Android devices.
 
 ## Release Note
 ### v1.5
+### v1.5.11
+- Update audioworker.apk (bc49bba-python-audio-autotest-v1.5.11)
+- audioworker: playback: support content_type, usage, and performance_mode
+
 ### v1.5.10
 - Fix Adb.get_devices() in case when adb didn't work well by retrying.
 
