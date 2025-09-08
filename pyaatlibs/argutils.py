@@ -1,6 +1,8 @@
 import getopt
 
+
 class AATArgParseUtils(object):
+
     @staticmethod
     def parse_arg(argv, options, required=[]):
         opts, args = getopt.getopt(argv, "", options)

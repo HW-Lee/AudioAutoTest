@@ -9,14 +9,17 @@ from pyaatlibs.adbutils import Adb
 from pyaatlibs.logger import Logger
 from pyaatlibs.timeutils import TimeUtils
 
+
 # Initialization of used variables
 class CommandHandler(object):
+
     def __init__(self):
         self.cmd = None
 
     def stop(self):
         if self.cmd:
             self.cmd.stop()
+
 
 class AudioFunction(object):
     WORK_THREAD = AudioCommandThread()
@@ -46,7 +49,9 @@ class AudioFunction(object):
         if not AudioFunction.HAS_BEEN_INIT:
             raise RuntimeError("The AudioFunction should be initialized before calling APIs")
         AudioFunction.COMMAND.stop()
-        AudioFunction.COMMAND.cmd = TonePlayCommand(config=AudioFunction.AUDIO_CONFIG, out_freq=out_freq)
+        AudioFunction.COMMAND.cmd = TonePlayCommand(
+            config=AudioFunction.AUDIO_CONFIG, out_freq=out_freq
+        )
         AudioFunction.WORK_THREAD.push(AudioFunction.COMMAND.cmd)
 
     @staticmethod
@@ -59,11 +64,16 @@ class AudioFunction(object):
             raise RuntimeError("The AudioFunction should be initialized before calling APIs")
         AudioFunction.COMMAND.stop()
         AudioFunction.AUDIO_CONFIG.cb = cb
-        AudioFunction.COMMAND.cmd = cmd if cmd is not None else \
-            ToneDetectCommand(config=AudioFunction.AUDIO_CONFIG, framemillis=50, nfft=2048)
+        AudioFunction.COMMAND.cmd = (
+            cmd
+            if cmd is not None
+            else ToneDetectCommand(config=AudioFunction.AUDIO_CONFIG, framemillis=50, nfft=2048)
+        )
         AudioFunction.WORK_THREAD.push(AudioFunction.COMMAND.cmd)
 
+
 class ToneDetectorThread(threading.Thread):
+
     def __init__(self, target_freq, callback):
         super(ToneDetectorThread, self).__init__()
         self.daemon = True
@@ -87,21 +97,22 @@ class ToneDetectorThread(threading.Thread):
         if self.target_freq == None:
             return True
 
-        diff_semitone = np.abs(np.log(1.0*freq/self.target_freq) / np.log(2) * 12)
+        diff_semitone = np.abs(np.log(1.0 * freq / self.target_freq) / np.log(2) * 12)
         return diff_semitone < 2
 
+
 class ToneDetectorForServerThread(ToneDetectorThread):
+
     def __init__(self, target_freq, callback):
-        super(ToneDetectorForServerThread, self).__init__(target_freq=target_freq, callback=callback)
+        super(ToneDetectorForServerThread, self).__init__(
+            target_freq=target_freq, callback=callback
+        )
 
     def join(self, timeout=None):
         super(ToneDetectorForServerThread, self).join(timeout)
 
     def run(self):
-        shared_vars = {
-            "start_time": None,
-            "last_event": None
-        }
+        shared_vars = {"start_time": None, "last_event": None}
 
         def freq_cb(detected_tones):
             if len(detected_tones) == 0:
@@ -115,14 +126,20 @@ class ToneDetectorForServerThread(ToneDetectorThread):
                 if self.event_counter == 1:
                     shared_vars["start_time"] = time_str
                 if self.event_counter == thresh:
-                    if not shared_vars["last_event"] or shared_vars["last_event"] != ToneDetector.Event.TONE_DETECTED:
+                    if (
+                        not shared_vars["last_event"]
+                        or shared_vars["last_event"] != ToneDetector.Event.TONE_DETECTED
+                    ):
                         self.cb((shared_vars["start_time"], ToneDetector.Event.TONE_DETECTED))
                         shared_vars["last_event"] = ToneDetector.Event.TONE_DETECTED
 
             else:
                 if self.event_counter > thresh:
                     shared_vars["start_time"] = None
-                    if not shared_vars["last_event"] or shared_vars["last_event"] != ToneDetector.Event.TONE_MISSING:
+                    if (
+                        not shared_vars["last_event"]
+                        or shared_vars["last_event"] != ToneDetector.Event.TONE_MISSING
+                    ):
                         self.cb((time_str, ToneDetector.Event.TONE_MISSING))
                         shared_vars["last_event"] = ToneDetector.Event.TONE_MISSING
                 self.event_counter = 0
@@ -173,7 +190,9 @@ class ToneDetector(object):
         ToneDetector.WORK_THREADS.clear()
         ToneDetector.WORK_THREADS = None
 
+
 class DetectionStateListener(object):
+
     class Event(object):
         ACTIVE = "active"
         INACTIVE = "inactive"
@@ -204,14 +223,18 @@ class DetectionStateListener(object):
         with self.event_q.mutex:
             current_event = self.current_event
         if current_event:
-            active_or_inactive = DetectionStateListener.Event.ACTIVE \
-                            if current_event[1] == ToneDetector.Event.TONE_DETECTED else \
-                                 DetectionStateListener.Event.INACTIVE
+            active_or_inactive = (
+                DetectionStateListener.Event.ACTIVE
+                if current_event[1] == ToneDetector.Event.TONE_DETECTED
+                else DetectionStateListener.Event.INACTIVE
+            )
 
         self.clear()
 
         if active_or_inactive:
-            Logger.log(self.get_tag(), "reset and resend the event ({}, 0)".format(active_or_inactive))
+            Logger.log(
+                self.get_tag(), "reset and resend the event ({}, 0)".format(active_or_inactive)
+            )
             self.event_q.put((active_or_inactive, 0))
 
     def tone_detected_event_cb(self, event):
@@ -219,27 +242,31 @@ class DetectionStateListener(object):
         self._handle_event(event)
 
     def _handle_event(self, event):
-        active_or_inactive = DetectionStateListener.Event.ACTIVE \
-                        if event[1] == ToneDetector.Event.TONE_DETECTED else \
-                             DetectionStateListener.Event.INACTIVE
+        active_or_inactive = (
+            DetectionStateListener.Event.ACTIVE
+            if event[1] == ToneDetector.Event.TONE_DETECTED
+            else DetectionStateListener.Event.INACTIVE
+        )
 
         self.event_q.put((active_or_inactive, 0))
 
         if self.current_event and self.current_event[1] != event[1]:
-            rising_or_falling = DetectionStateListener.Event.RISING_EDGE \
-                            if event[1] == ToneDetector.Event.TONE_DETECTED else \
-                                DetectionStateListener.Event.FALLING_EDGE
+            rising_or_falling = (
+                DetectionStateListener.Event.RISING_EDGE
+                if event[1] == ToneDetector.Event.TONE_DETECTED
+                else DetectionStateListener.Event.FALLING_EDGE
+            )
 
             t2 = TimeUtils.time_from_str(event[0])
             t1 = TimeUtils.time_from_str(self.current_event[0])
             t_diff = t2 - t1
-            self.event_q.put((rising_or_falling, t_diff.total_seconds()*1000.0))
+            self.event_q.put((rising_or_falling, t_diff.total_seconds() * 1000.0))
 
         self.current_event = event
 
     def wait_for_event(self, event, timeout):
         cnt = 0
-        while cnt < timeout*10:
+        while cnt < timeout * 10:
             cnt += 1
             if self.stoprequest.isSet():
                 return -1
@@ -252,10 +279,15 @@ class DetectionStateListener(object):
                 with self.event_q.mutex:
                     current_event = self.current_event
                 if current_event:
-                    active_or_inactive = DetectionStateListener.Event.ACTIVE \
-                        if current_event[1] == ToneDetector.Event.TONE_DETECTED else \
-                             DetectionStateListener.Event.INACTIVE
+                    active_or_inactive = (
+                        DetectionStateListener.Event.ACTIVE
+                        if current_event[1] == ToneDetector.Event.TONE_DETECTED
+                        else DetectionStateListener.Event.INACTIVE
+                    )
                     if active_or_inactive == event:
-                        Logger.log(self.get_tag(), "the current state '{}' fits the waited event".format(event))
+                        Logger.log(
+                            self.get_tag(),
+                            "the current state '{}' fits the waited event".format(event),
+                        )
                         return 0
         return -1

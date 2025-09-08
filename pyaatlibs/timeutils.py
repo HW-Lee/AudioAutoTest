@@ -2,7 +2,9 @@ import datetime
 import time
 import threading
 
+
 class Timer(threading.Thread):
+
     def __init__(self, period_ms=1):
         super(Timer, self).__init__()
         self.timer = TicToc()
@@ -48,11 +50,12 @@ class Timer(threading.Thread):
                 running = self.running
 
             if not running:
-                time.sleep(self.period_ms / 1000.)
+                time.sleep(self.period_ms / 1000.0)
                 continue
 
             self._update()
-            time.sleep(self.period_ms / 1000.)
+            time.sleep(self.period_ms / 1000.0)
+
 
 def TicTocGenerator():
     tf = datetime.datetime.now()
@@ -61,7 +64,9 @@ def TicTocGenerator():
         tf = datetime.datetime.now()
         yield (tf - ti).total_seconds()
 
+
 class TicToc(object):
+
     def __init__(self):
         self.tictoc = TicTocGenerator()
 
@@ -70,6 +75,7 @@ class TicToc(object):
 
     def tic(self):
         next(self.tictoc)
+
 
 class TimeUtils(object):
     TIME_STR_FORMAT = "%Y-%m-%d %H:%M:%S.%f"
@@ -92,8 +98,11 @@ class TimeUtils(object):
         if ms <= 0:
             return "0s"
         t = datetime.datetime.fromtimestamp(ms / 1000.0) - datetime.datetime.fromtimestamp(0)
-        t = [str(int(s)) if s.isdigit() else str(float(s))
-                 for s in str(t).replace(" days, ", ":").split(":") if float(s) > 0]
+        t = [
+            str(int(s)) if s.isdigit() else str(float(s))
+            for s in str(t).replace(" days, ", ":").split(":")
+            if float(s) > 0
+        ]
         s = "{} ".join(t) + "{}"
-        s = s.format(*TimeUtils.TIME_UNITS[-len(t):])
+        s = s.format(*TimeUtils.TIME_UNITS[-len(t) :])
         return s

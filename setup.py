@@ -24,13 +24,13 @@ install_reqs = [
     "scikit-learn==1.0.2" if not is_python_310 else "scikit-learn==1.3.0",
     "matplotlib==3.5.3",
     "librosa==0.9.2",
-    "sounddevice==0.4.5"
+    "sounddevice==0.4.5",
 ]
 
 setuptools.setup(
     name="python-audio-autotest{}".format("" if not is_python_310 else "-3.10"),
-    version="1.5.11",
-    scripts=[] ,
+    version="1.6",
+    scripts=[],
     author="Hao-Wei Lee",
     author_email="hwinnerlee@gmail.com, hwlee@google.com",
     description="This is a auto-testing framework of audio functions for Android devices.",
@@ -40,9 +40,7 @@ setuptools.setup(
     install_requires=install_reqs,
     packages=packages,
     include_package_data=True,
-    package_data={
-        "pyaatlibs": ["apk/*.apk", "tests/*.py"]
-    },
+    package_data={"pyaatlibs": ["apk/*.apk", "tests/*.py"]},
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: Apache Software License",

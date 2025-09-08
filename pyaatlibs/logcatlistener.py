@@ -14,7 +14,9 @@ try:
 except ImportError:
     import Queue as queue
 
+
 class LogcatOutputThread(threading.Thread):
+
     def __init__(self, serialno, buffername):
         super(LogcatOutputThread, self).__init__()
         self.serialno = serialno
@@ -44,9 +46,12 @@ class LogcatOutputThread(threading.Thread):
         preexec_fn = None if platform.system() == "Windows" else os.setsid
         cmd = ["adb", "-s", self.serialno, "logcat"]
         cmd = cmd + ["-b", self.buffername] if self.buffername else cmd
-        Logger.log("LogcatOutputThread", "threadloop is listening with the command '{}'".format(cmd))
-        self.proc = subprocess.Popen(cmd,
-            stdout=subprocess.PIPE, stderr=subprocess.PIPE, preexec_fn=preexec_fn)
+        Logger.log(
+            "LogcatOutputThread", "threadloop is listening with the command '{}'".format(cmd)
+        )
+        self.proc = subprocess.Popen(
+            cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, preexec_fn=preexec_fn
+        )
         while not self.stoprequest.isSet():
             if self.proc.poll() != None:
                 break
@@ -56,9 +61,9 @@ class LogcatOutputThread(threading.Thread):
             if sys.version_info.major > 2:
                 line = line.decode("utf-8", errors="ignore")
 
-            if not self.lasttime_update_timer.is_alive(): # start for the first time
+            if not self.lasttime_update_timer.is_alive():  # start for the first time
                 self.lasttime_update_timer.start()
-            else: # reset for the followings
+            else:  # reset for the followings
                 self.lasttime_update_timer.reset()
             self._handle_logcat_msg(line)
 
@@ -74,10 +79,13 @@ class LogcatOutputThread(threading.Thread):
             if pattern in msg:
                 self.listeners[pattern].cb(pattern=pattern, msg=msg)
 
+
 class LogcatEvent(object):
+
     def __init__(self, pattern=None, cb=None):
         self.pattern = pattern
         self.cb = cb
+
 
 class LogcatListener(object):
     WORK_THREADS = {}
@@ -88,8 +96,10 @@ class LogcatListener(object):
 
         for threadname, th in LogcatListener.WORK_THREADS.items():
             Logger.log("LogcatListener::dump", "thread[{}]".format(threadname))
-            Logger.log("LogcatListener::dump",
-                "    - Last time processing: {} ms ago".format(th.lasttime_update_timer.get_time()))
+            Logger.log(
+                "LogcatListener::dump",
+                "    - Last time processing: {} ms ago".format(th.lasttime_update_timer.get_time()),
+            )
             for event_pattern in th.listeners.keys():
                 Logger.log("LogcatListener::dump", "    - pattern '{}'".format(event_pattern))
 
@@ -119,7 +129,8 @@ class LogcatListener(object):
         threadname = "{}-{}".format(serialno, buffername)
         if threadname in LogcatListener.WORK_THREADS.keys():
             Logger.log(
-                "LogcatListener", "there is an existing running thread ({}).".format(threadname))
+                "LogcatListener", "there is an existing running thread ({}).".format(threadname)
+            )
             if not flush:
                 Logger.log("LogcatListener", "skip the initialization.")
                 return

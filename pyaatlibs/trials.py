@@ -4,16 +4,21 @@ from pyaatlibs.timeutils import TimeUtils
 
 try:
     import functools
+
     reduce = functools.reduce
 except ImportError:
     pass
 
+
 class TrialHelper(object):
+
     @staticmethod
     def _check_type(trials):
         if not isinstance(trials, list):
             raise ValueError("The input must be an instance of list")
-        if len(trials) > 0 and not reduce( lambda x, y: x & y, map(lambda trial: isinstance(trial, Trial), trials) ):
+        if len(trials) > 0 and not reduce(
+            lambda x, y: x & y, map(lambda trial: isinstance(trial, Trial), trials)
+        ):
             raise ValueError("The input contains elements which are not instances of Trial")
 
     @staticmethod
@@ -49,7 +54,7 @@ class TrialHelper(object):
     @staticmethod
     def to_json(trials):
         TrialHelper._check_type(trials)
-        return json.dumps( list(map(lambda trial: trial.ds, trials)), indent=4, ensure_ascii=False )
+        return json.dumps(list(map(lambda trial: trial.ds, trials)), indent=4, ensure_ascii=False)
 
     @staticmethod
     def pass_fail_list(trials, check_func=None):
@@ -60,12 +65,13 @@ class TrialHelper(object):
 
 
 class Trial(object):
+
     def __init__(self, taskname=None, pass_check=None):
         self.ds = {
             "task": taskname,
             "timestamp": TimeUtils.now_str(),
             "status": "valid",
-            "error-msg": None
+            "error-msg": None,
         }
         self.pass_check = pass_check
 

@@ -7,6 +7,7 @@ import numpy as np
 
 from pyaatlibs import SEP
 
+
 class AudioSignalFrameLogger(object):
     INFO_FILE = "info.json"
     BIN_FILE = "stream.bin"
@@ -18,14 +19,12 @@ class AudioSignalFrameLogger(object):
 
     def push(self, name, fs, values):
         self.lock.acquire()
-        self.info.append(
-                {
-                    "name": name,
-                    "fs": fs,
-                    "datasize-in-double": values.shape[0],
-                    "createAt": "{} (UTF+8)".format(str(datetime.datetime.now())[:-3])
-                }
-            )
+        self.info.append({
+            "name": name,
+            "fs": fs,
+            "datasize-in-double": values.shape[0],
+            "createAt": "{} (UTF+8)".format(str(datetime.datetime.now())[:-3]),
+        })
         self.databuf.append(np.array(values, dtype=np.float64))
         self.lock.release()
 
@@ -33,7 +32,9 @@ class AudioSignalFrameLogger(object):
         if path.endswith(SEP):
             path = path[:-1]
         self.lock.acquire()
-        out, _ = subprocess.Popen(["mkdir", "-p", path], stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
+        out, _ = subprocess.Popen(
+            ["mkdir", "-p", path], stdout=subprocess.PIPE, stderr=subprocess.PIPE
+        ).communicate()
 
         with open("{}{}{}".format(path, SEP, AudioSignalFrameLogger.INFO_FILE), "w") as f:
             f.write(json.dumps(self.info, indent=4) + "\n")

@@ -7,46 +7,54 @@ import packaging.version
 
 import pyaatlibs
 from pyaatlibs.audioworker import AudioWorkerApp, RecordPerf, RecordApi, RecordInputSrc
+
 try:
     from pyaatlibs.audioworker import TaskIndex
 except:
+
     class TaskIndex:
         ALL = -1
+
 
 from pyaatlibs.adbutils import Adb
 
 SHORT_SHA_FMT = "[0-9a-f]{7,40}"
 VERSION_FMT = "\\d+(\\.\\d+)*"
 
+
 @pytest.fixture(scope="session")
 def apk_path(pytestconfig):
     return pytestconfig.getoption("apk_path")
+
 
 @pytest.fixture(scope="session")
 def serialno(pytestconfig):
     return pytestconfig.getoption("serialno")
 
+
 @pytest.fixture(scope="session")
 def target_version():
     return AudioWorkerApp.get_apk_version()
+
 
 @pytest.fixture(scope="session")
 def skip_version_check(pytestconfig):
     return pytestconfig.getoption("skip_version_check")
 
+
 @pytest.fixture(scope="session")
 def skip_function_check(pytestconfig):
     return pytestconfig.getoption("skip_function_check")
+
 
 @pytest.fixture(scope="session")
 def dut_info_provided(serialno):
     return all([serialno])
 
+
 @pytest.fixture(scope="session")
 def check_options(pytestconfig):
-    required_options = [
-        "serialno"
-    ]
+    required_options = ["serialno"]
 
     # It only allows that all required parameters being specified or kept empty
     if not any(map(pytestconfig.getoption, required_options)):
@@ -54,6 +62,7 @@ def check_options(pytestconfig):
 
     for ropt in required_options:
         assert pytestconfig.getoption(ropt) is not None
+
 
 def intersect_dict(d1, d2):
     intersection = {}
@@ -71,61 +80,25 @@ def intersect_dict(d1, d2):
 
     return intersection
 
+
 def test_intersect_dict():
     assert intersect_dict({"a": 1}, {"b": 1}) == {}
     assert intersect_dict({"a": 1, "c": 3}, {"b": 1}) == {}
     assert intersect_dict({"a": 1, "c": 3}, {"b": 1, "c": 3}) == {"c": 3}
     assert intersect_dict({"a": 1, "c": 3}, {"b": 1, "c": 3}) == {"c": 3}
     assert intersect_dict({"a": 1, "c": 3}, {"b": 1, "c": 2}) == {}
-    assert intersect_dict(
-        {
-            "a": 1,
-            "c": {
-                "a": 1
-            }
-        },
-        {
-            "b": 1,
-            "c": 3
-        }) == {}
-    assert intersect_dict(
-        {
-            "a": 1,
-            "c": {
-                "a": 1
-            }
-        },
-        {
-            "b": 1,
-            "c": {
-                "a": 1
-            }
-        }) == {
-            "c": {
-                "a": 1
-            }
-        }
-    assert intersect_dict(
-        {
-            "a": 1,
-            "c": {
-                "a": 1
-            }
-        },
-        {
-            "b": 1,
-            "c": {
-                "a": 2
-            }
-        }) == {
-            "c": {}
-        }
+    assert intersect_dict({"a": 1, "c": {"a": 1}}, {"b": 1, "c": 3}) == {}
+    assert intersect_dict({"a": 1, "c": {"a": 1}}, {"b": 1, "c": {"a": 1}}) == {"c": {"a": 1}}
+    assert intersect_dict({"a": 1, "c": {"a": 1}}, {"b": 1, "c": {"a": 2}}) == {"c": {}}
+
 
 def is_subdict(smaller, larger):
     return intersect_dict(smaller, larger) == smaller
 
+
 def assert_if_not_subdict(smaller, larger):
     assert intersect_dict(smaller, larger) == smaller
+
 
 def test_is_subdict():
     assert is_subdict({}, {})
@@ -135,6 +108,7 @@ def test_is_subdict():
     assert is_subdict({"b": {"a": 1}}, {"a": 1, "b": {"a": 1, "b": 1}})
     assert not is_subdict({"b": {"a": 1}}, {"a": 1, "b": {}})
     assert not is_subdict({"b": {"a": 1}}, {"a": 1, "b": {"a": 2}})
+
 
 def test_install(check_options, serialno, apk_path):
     if not any([serialno, apk_path]):
@@ -149,6 +123,7 @@ def test_install(check_options, serialno, apk_path):
     AudioWorkerApp.install(serialno=serialno, grant=True)
     assert AudioWorkerApp.installed(serialno=serialno)
 
+
 def test_apk_version(check_options, target_version, serialno, skip_version_check):
     if not any([target_version, serialno]):
         pytest.skip("The information of DuT is not provided.")
@@ -160,11 +135,13 @@ def test_apk_version(check_options, target_version, serialno, skip_version_check
     assert len(apk_version) > 0
 
     vname_fmt = "(?P<commit_sha>{})\\-python\\-audio\\-autotest\\-v(?P<pyaat_version>{})$".format(
-        SHORT_SHA_FMT, VERSION_FMT)
+        SHORT_SHA_FMT, VERSION_FMT
+    )
 
     m = re.match(vname_fmt, apk_version)
     assert m is not None, "The version name '{}' is not valid.".format(out.strip())
     assert apk_version == target_version
+
 
 def wait_for_activities(serialno, func, onset=True):
     retry = 10
@@ -177,22 +154,25 @@ def wait_for_activities(serialno, func, onset=True):
 
     return False
 
+
 def wait_for_playback_activities(serialno, onset=True):
     return wait_for_activities(serialno, AudioWorkerApp.playback_info, onset)
+
 
 def wait_for_record_activities(serialno, onset=True, task_index=TaskIndex.ALL):
     try:
         pyaatlibs.__version__
-        func = lambda serialno: AudioWorkerApp.record_info(
-            serialno=serialno, task_index=task_index)
+        func = lambda serialno: AudioWorkerApp.record_info(serialno=serialno, task_index=task_index)
     except:
         func = AudioWorkerApp.record_info
 
     return wait_for_activities(serialno, func, onset)
 
+
 def prepare_app(serialno):
     AudioWorkerApp.relaunch_app(serialno=serialno)
     time.sleep(3)
+
 
 def run_general_single_playback(serialno, playback_type):
     prepare_app(serialno=serialno)
@@ -213,7 +193,7 @@ def run_general_single_playback(serialno, playback_type):
         "low-latency": {
             "serialno": serialno,
             "low_latency_mode": True,
-        }
+        },
     }
 
     playback_func = FUNCTIONS[playback_type]
@@ -225,24 +205,29 @@ def run_general_single_playback(serialno, playback_type):
     # Default test
     playback_func(**cfg)
     assert wait_for_playback_activities(serialno=serialno)
-    assert_if_not_subdict({
-        playback_type: {
-            "0": {
-                "class": "com.google.audioworker.functions.audio.playback.PlaybackStartFunction",
-                "has-ack": False,
-                "params": {
-                    "type": playback_type,
-                    "target-freqs": "440.0",
-                    "playback-id": 0,
-                    "low-latency-mode": "low_latency_mode" in cfg and cfg["low_latency_mode"],
-                    "amplitude": 0.6,
-                    "sampling-freq": 16000,
-                    "num-channels": 2,
-                    "pcm-bit-width": 16
+    assert_if_not_subdict(
+        {
+            playback_type: {
+                "0": {
+                    "class": (
+                        "com.google.audioworker.functions.audio.playback.PlaybackStartFunction"
+                    ),
+                    "has-ack": False,
+                    "params": {
+                        "type": playback_type,
+                        "target-freqs": "440.0",
+                        "playback-id": 0,
+                        "low-latency-mode": "low_latency_mode" in cfg and cfg["low_latency_mode"],
+                        "amplitude": 0.6,
+                        "sampling-freq": 16000,
+                        "num-channels": 2,
+                        "pcm-bit-width": 16,
+                    },
                 }
             }
-        }
-    }, AudioWorkerApp.playback_info(serialno=serialno))
+        },
+        AudioWorkerApp.playback_info(serialno=serialno),
+    )
 
     AudioWorkerApp.playback_stop(serialno=serialno)
     assert wait_for_playback_activities(serialno=serialno, onset=False)
@@ -250,24 +235,29 @@ def run_general_single_playback(serialno, playback_type):
     # Specifying playback id
     playback_func(**cfg, playback_id=1)
     assert wait_for_playback_activities(serialno=serialno)
-    assert_if_not_subdict({
-        playback_type: {
-            "1": {
-                "class": "com.google.audioworker.functions.audio.playback.PlaybackStartFunction",
-                "has-ack": False,
-                "params": {
-                    "type": playback_type,
-                    "target-freqs": "440.0",
-                    "playback-id": 1,
-                    "low-latency-mode": "low_latency_mode" in cfg and cfg["low_latency_mode"],
-                    "amplitude": 0.6,
-                    "sampling-freq": 16000,
-                    "num-channels": 2,
-                    "pcm-bit-width": 16
+    assert_if_not_subdict(
+        {
+            playback_type: {
+                "1": {
+                    "class": (
+                        "com.google.audioworker.functions.audio.playback.PlaybackStartFunction"
+                    ),
+                    "has-ack": False,
+                    "params": {
+                        "type": playback_type,
+                        "target-freqs": "440.0",
+                        "playback-id": 1,
+                        "low-latency-mode": "low_latency_mode" in cfg and cfg["low_latency_mode"],
+                        "amplitude": 0.6,
+                        "sampling-freq": 16000,
+                        "num-channels": 2,
+                        "pcm-bit-width": 16,
+                    },
                 }
             }
-        }
-    }, AudioWorkerApp.playback_info(serialno=serialno))
+        },
+        AudioWorkerApp.playback_info(serialno=serialno),
+    )
 
     AudioWorkerApp.playback_stop(serialno=serialno)
     assert wait_for_playback_activities(serialno=serialno, onset=False)
@@ -275,28 +265,34 @@ def run_general_single_playback(serialno, playback_type):
     # Dual frequencies playback
     playback_func(**cfg, freqs=[440, 442])
     assert wait_for_playback_activities(serialno=serialno)
-    assert_if_not_subdict({
-        playback_type: {
-            "0": {
-                "class": "com.google.audioworker.functions.audio.playback.PlaybackStartFunction",
-                "has-ack": False,
-                "params": {
-                    "type": playback_type,
-                    "target-freqs": "440,442",
-                    "playback-id": 0,
-                    "low-latency-mode": "low_latency_mode" in cfg and cfg["low_latency_mode"],
-                    "amplitude": 0.6,
-                    "sampling-freq": 16000,
-                    "num-channels": 2,
-                    "pcm-bit-width": 16
+    assert_if_not_subdict(
+        {
+            playback_type: {
+                "0": {
+                    "class": (
+                        "com.google.audioworker.functions.audio.playback.PlaybackStartFunction"
+                    ),
+                    "has-ack": False,
+                    "params": {
+                        "type": playback_type,
+                        "target-freqs": "440,442",
+                        "playback-id": 0,
+                        "low-latency-mode": "low_latency_mode" in cfg and cfg["low_latency_mode"],
+                        "amplitude": 0.6,
+                        "sampling-freq": 16000,
+                        "num-channels": 2,
+                        "pcm-bit-width": 16,
+                    },
                 }
             }
-        }
-    }, AudioWorkerApp.playback_info(serialno=serialno))
+        },
+        AudioWorkerApp.playback_info(serialno=serialno),
+    )
 
     # Stop
     AudioWorkerApp.playback_stop(serialno=serialno)
     assert wait_for_playback_activities(serialno=serialno, onset=False)
+
 
 def test_single_nonoffload_playback(check_options, target_version, skip_function_check, serialno):
     if not any([target_version, serialno]):
@@ -307,6 +303,7 @@ def test_single_nonoffload_playback(check_options, target_version, skip_function
 
     run_general_single_playback(serialno=serialno, playback_type="non-offload")
 
+
 def test_single_offload_playback(check_options, target_version, skip_function_check, serialno):
     if not any([target_version, serialno]):
         pytest.skip("The information of DuT is not provided.")
@@ -316,6 +313,7 @@ def test_single_offload_playback(check_options, target_version, skip_function_ch
 
     run_general_single_playback(serialno=serialno, playback_type="offload")
 
+
 def test_single_low_latency_playback(check_options, target_version, skip_function_check, serialno):
     if not any([target_version, serialno]):
         pytest.skip("The information of DuT is not provided.")
@@ -324,6 +322,7 @@ def test_single_low_latency_playback(check_options, target_version, skip_functio
         pytest.skip("The function check is skipped.")
 
     run_general_single_playback(serialno=serialno, playback_type="low-latency")
+
 
 def manipulate_detector_handle_names(detectors_dict):
     keys = sorted(list(detectors_dict))
@@ -337,10 +336,10 @@ def manipulate_detector_handle_names(detectors_dict):
     for k in keys:
         del detectors_dict[k]
 
-DEFAULT_DUMP_MS = {
-    "default": 1000,
-    "1.4.3": 0
-}
+
+DEFAULT_DUMP_MS = {"default": 1000, "1.4.3": 0}
+
+
 def test_single_record(check_options, target_version, skip_function_check, serialno):
     if not any([target_version, serialno]):
         pytest.skip("The information of DuT is not provided.")
@@ -348,8 +347,11 @@ def test_single_record(check_options, target_version, skip_function_check, seria
     if skip_function_check:
         pytest.skip("The function check is skipped.")
 
-    dump_buffer_ms = DEFAULT_DUMP_MS["default"] \
-        if not target_version in DEFAULT_DUMP_MS else DEFAULT_DUMP_MS[target_version]
+    dump_buffer_ms = (
+        DEFAULT_DUMP_MS["default"]
+        if not target_version in DEFAULT_DUMP_MS
+        else DEFAULT_DUMP_MS[target_version]
+    )
 
     prepare_app(serialno=serialno)
 
@@ -369,14 +371,15 @@ def test_single_record(check_options, target_version, skip_function_check, seria
                 "btsco-on": True,
                 "input-src": 1,
                 "audio-api": 0,
-                "audio-perf": 10
-            }
+                "audio-perf": 10,
+            },
         },
         # The detectors' information
-        {}
+        {},
     ]
     for a, b in zip(ans, AudioWorkerApp.record_info(serialno=serialno)):
         import json
+
         print(json.dumps(a, indent=2))
         print(json.dumps(b, indent=2))
         assert_if_not_subdict(a, b)
@@ -385,26 +388,30 @@ def test_single_record(check_options, target_version, skip_function_check, seria
 
     # Detector registration
     AudioWorkerApp.record_detector_register(
-        serialno=serialno, dclass="ToneDetector", params={"target-freq": [440]})
+        serialno=serialno, dclass="ToneDetector", params={"target-freq": [440]}
+    )
     info = AudioWorkerApp.record_info(serialno=serialno)
 
     # It's composed of the track's and its detectors' information packed in dicts
     assert len(info) == 2 and all(map(lambda x: isinstance(x, dict), info))
 
-    assert_if_not_subdict({
-        "class": "com.google.audioworker.functions.audio.record.RecordStartFunction",
-        "has-ack": False,
-        "params": {
-            "sampling-freq": 16000,
-            "num-channels": 2,
-            "pcm-bit-width": 16,
-            "dump-buffer-ms": dump_buffer_ms,
-            "btsco-on": True,
-            "input-src": 1,
-            "audio-api": 0,
-            "audio-perf": 10
-        }
-    }, info[0])
+    assert_if_not_subdict(
+        {
+            "class": "com.google.audioworker.functions.audio.record.RecordStartFunction",
+            "has-ack": False,
+            "params": {
+                "sampling-freq": 16000,
+                "num-channels": 2,
+                "pcm-bit-width": 16,
+                "dump-buffer-ms": dump_buffer_ms,
+                "btsco-on": True,
+                "input-src": 1,
+                "audio-api": 0,
+                "audio-perf": 10,
+            },
+        },
+        info[0],
+    )
 
     # It should contain exactly 1 detector and the handle name should be in the form like:
     #   com.google.audioworker.functions.audio.record.detectors.ToneDetector@18fad39
@@ -425,8 +432,8 @@ def test_single_record(check_options, target_version, skip_function_check, seria
                 "btsco-on": True,
                 "input-src": 1,
                 "audio-api": 0,
-                "audio-perf": 10
-            }
+                "audio-perf": 10,
+            },
         },
         {
             "detector#0": {
@@ -437,22 +444,19 @@ def test_single_record(check_options, target_version, skip_function_check, seria
                 "unit": {
                     "Sampling Frequency": "Hz",
                     "Process Frame Size": "ms",
-                    "Tolerance (semitone)": "keys"
+                    "Tolerance (semitone)": "keys",
                 },
-                "Targets": [
-                    {
-                        "target-freq": 440
-                    }
-                ]
+                "Targets": [{"target-freq": 440}],
             }
-        }
+        },
     ]
     for a, b in zip(ans, info):
         assert_if_not_subdict(a, b)
 
     # Multiple detectors registration
     AudioWorkerApp.record_detector_register(
-        serialno=serialno, dclass="ToneDetector", params={"target-freq": [442]})
+        serialno=serialno, dclass="ToneDetector", params={"target-freq": [442]}
+    )
     info = AudioWorkerApp.record_info(serialno=serialno)
 
     # It's composed of the track's and its detectors' information packed in dicts
@@ -477,8 +481,8 @@ def test_single_record(check_options, target_version, skip_function_check, seria
                 "btsco-on": True,
                 "input-src": 1,
                 "audio-api": 0,
-                "audio-perf": 10
-            }
+                "audio-perf": 10,
+            },
         },
         {
             "detector#0": {
@@ -489,13 +493,9 @@ def test_single_record(check_options, target_version, skip_function_check, seria
                 "unit": {
                     "Sampling Frequency": "Hz",
                     "Process Frame Size": "ms",
-                    "Tolerance (semitone)": "keys"
+                    "Tolerance (semitone)": "keys",
                 },
-                "Targets": [
-                    {
-                        "target-freq": 442
-                    }
-                ]
+                "Targets": [{"target-freq": 442}],
             },
             "detector#1": {
                 "Handle": "detector#1",
@@ -505,15 +505,11 @@ def test_single_record(check_options, target_version, skip_function_check, seria
                 "unit": {
                     "Sampling Frequency": "Hz",
                     "Process Frame Size": "ms",
-                    "Tolerance (semitone)": "keys"
+                    "Tolerance (semitone)": "keys",
                 },
-                "Targets": [
-                    {
-                        "target-freq": 440
-                    }
-                ]
-            }
-        }
+                "Targets": [{"target-freq": 440}],
+            },
+        },
     ]
     for a, b in zip(ans, info):
         assert_if_not_subdict(a, b)
@@ -521,6 +517,7 @@ def test_single_record(check_options, target_version, skip_function_check, seria
     # Stop
     AudioWorkerApp.record_stop(serialno=serialno)
     assert wait_for_record_activities(serialno=serialno, onset=False)
+
 
 def test_concurrent_record(check_options, target_version, skip_function_check, serialno):
     if packaging.version.parse(target_version.split("-")[-1]) < packaging.version.parse("1.5"):
@@ -548,8 +545,8 @@ def test_concurrent_record(check_options, target_version, skip_function_check, s
                 "input-src": 1,
                 "audio-api": 0,
                 "audio-perf": 10,
-                "task-index": 0
-            }
+                "task-index": 0,
+            },
         },
         {},
         {
@@ -564,10 +561,10 @@ def test_concurrent_record(check_options, target_version, skip_function_check, s
                 "input-src": 1,
                 "audio-api": 0,
                 "audio-perf": 10,
-                "task-index": 1
-            }
+                "task-index": 1,
+            },
         },
-        {}
+        {},
     ]
     for a, b in zip(ans, AudioWorkerApp.record_info(serialno=serialno)):
         assert_if_not_subdict(a, b)
@@ -578,11 +575,19 @@ def test_concurrent_record(check_options, target_version, skip_function_check, s
 
     # Different configurations
     AudioWorkerApp.record_start(
-        serialno=serialno, task_index=0,
-        input_src=RecordInputSrc.MIC, api=RecordApi.OPENSLES, perf=RecordPerf.POWER_SAVING)
+        serialno=serialno,
+        task_index=0,
+        input_src=RecordInputSrc.MIC,
+        api=RecordApi.OPENSLES,
+        perf=RecordPerf.POWER_SAVING,
+    )
     AudioWorkerApp.record_start(
-        serialno=serialno, task_index=1,
-        input_src=RecordInputSrc.CAMCORDER, api=RecordApi.AAUDIO, perf=RecordPerf.LOW_LATENCY)
+        serialno=serialno,
+        task_index=1,
+        input_src=RecordInputSrc.CAMCORDER,
+        api=RecordApi.AAUDIO,
+        perf=RecordPerf.LOW_LATENCY,
+    )
     assert wait_for_record_activities(serialno=serialno, task_index=0)
     assert wait_for_record_activities(serialno=serialno, task_index=1)
 
@@ -599,8 +604,8 @@ def test_concurrent_record(check_options, target_version, skip_function_check, s
                 "input-src": 1,
                 "audio-api": 1,
                 "audio-perf": 11,
-                "task-index": 0
-            }
+                "task-index": 0,
+            },
         },
         {},
         {
@@ -615,13 +620,14 @@ def test_concurrent_record(check_options, target_version, skip_function_check, s
                 "input-src": 5,
                 "audio-api": 2,
                 "audio-perf": 12,
-                "task-index": 1
-            }
+                "task-index": 1,
+            },
         },
-        {}
+        {},
     ]
     for a, b in zip(ans, AudioWorkerApp.record_info(serialno=serialno)):
         assert_if_not_subdict(a, b)
+
 
 def test_uninstall(check_options, serialno):
     if not any([serialno]):

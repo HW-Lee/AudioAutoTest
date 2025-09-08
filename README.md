@@ -5,6 +5,16 @@ This is a auto-testing framework of audio functions for Android devices.
 - For checking the detailed information of APIs, please refer to the [documentation](https://github.com/HW-Lee/AudioAutoTest/blob/master/libs/README.md)
 
 ## Release Note
+### v1.6
+- Update audioworker.apk (47d7dac-python-audio-autotest-v1.6)
+  - Style: Apply AOSP Java code style
+  - audioworker: Comply with Scoped Storage and add audio features
+  - chore: Upgrade Gradle and AGP to 8.13
+- Dynamically read APK version instead of using a hardcoded value.
+- Grant MANAGE_EXTERNAL_STORAGE permission for modern Android.
+- Improve robustness of on-device timestamp parsing.
+- style: Add pyink configuration and format python files.
+
 ### v1.5
 ### v1.5.11
 - Update audioworker.apk (bc49bba-python-audio-autotest-v1.5.11)
