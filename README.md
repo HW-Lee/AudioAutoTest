@@ -5,6 +5,12 @@ This is a auto-testing framework of audio functions for Android devices.
 - For checking the detailed information of APIs, please refer to the [documentation](https://github.com/HW-Lee/AudioAutoTest/blob/master/libs/README.md)
 
 ## Release Note
+### v1.6.x
+
+### v1.6.1
+- Update audioworker.apk (e15de78-python-audio-autotest-v1.6.1)
+  - fix: Correct channel mask selection for AudioFormat
+
 ### v1.6
 - Update audioworker.apk (47d7dac-python-audio-autotest-v1.6)
   - Style: Apply AOSP Java code style
