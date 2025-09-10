@@ -7,6 +7,10 @@ This is a auto-testing framework of audio functions for Android devices.
 ## Release Note
 ### v1.6.x
 
+### v1.6.2
+- Update audioworker.apk (79cab8a-python-audio-autotest-v1.6.2)
+  - Enable background audio and fix startup crash
+
 ### v1.6.1
 - Update audioworker.apk (e15de78-python-audio-autotest-v1.6.1)
   - fix: Correct channel mask selection for AudioFormat
