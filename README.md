@@ -7,6 +7,21 @@ This is a auto-testing framework of audio functions for Android devices.
 ## Release Note
 ### v1.6.x
 
+### v1.6.4
+- Update audioworker.apk (4329037-python-audio-autotest-v1.6.4)
+  - audioworker: Add haptic playback and multi-channel amplitude support
+    - Added a `haptic-playback` parameter to enable haptic feedback
+      synchronized with audio playback. This required adding the
+      `VIBRATE` permission and configuring the correct `AudioAttributes`.
+    - The `amplitude` parameter now accepts a comma-separated string of
+      floats, allowing for individual amplitude control for each channel
+      in a multi-channel setup.
+    - Expanded audio channel support up to 8 channels.
+    - Added support for `.ogg` file playback.
+    - Removed the deprecated `stream-type` attribute in favor of
+      `usage` and `content-type` for modern Android versions.
+- Update audioworker.py to support new featuers and deprecate unsupported options
+
 ### v1.6.3
 - Relax dependency constraints for modern Python versions.
 

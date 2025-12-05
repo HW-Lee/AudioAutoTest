@@ -41,17 +41,6 @@ class RecordApi(IntEnum):
     AAUDIO = auto()
 
 
-class PlaybackStream(IntEnum):
-    VOICE_CALL = 0
-    SYSTEM = auto()
-    RING = auto()
-    MUSIC = auto()
-    ALARM = auto()
-    NOTIFICATION = auto()
-    DTMF = 8
-    ACCESSIBILITY = 10
-
-
 class PlaybackContentType(IntEnum):
     UNKNOWN = 0
     SPEECH = auto()
@@ -232,15 +221,15 @@ class AudioWorkerApp(AppInterface):
         freqs=[440.0],
         playback_id=0,
         file="null",
-        stream_type=PlaybackStream.MUSIC,
         performance_mode=PlaybackPerformanceMode.NOT_SET,
-        content_type=PlaybackContentType.MUSIC,
-        usage=PlaybackUsage.MEDIA,
+        content_type=None,
+        usage=None,
         fs=16000,
         nch=2,
         amp=0.6,
         bit_depth=16,
         low_latency_mode=False,
+        haptic_playback=False,
     ):
         name = __class__.AUDIOWORKER_INTENT_PREFIX + "playback.start"
         configs = {
@@ -253,11 +242,13 @@ class AudioWorkerApp(AppInterface):
             "pcm-bit-width": bit_depth,
             "low-latency-mode": low_latency_mode,
             "file": file,
-            "stream-type": stream_type,
-            "usage": usage,
-            "content-type": content_type,
             "performance-mode": performance_mode,
+            "haptic-playback": haptic_playback,
         }
+        if content_type is not None:
+            configs["content-type"] = content_type
+        if usage is not None:
+            configs["usage"] = usage
         __class__.send_intent(device, serialno, name, configs)
 
     @staticmethod
@@ -275,9 +266,8 @@ class AudioWorkerApp(AppInterface):
         device=None,
         serialno=None,
         file="null",
-        stream_type=PlaybackStream.MUSIC,
-        content_type=PlaybackContentType.MUSIC,
-        usage=PlaybackUsage.MEDIA,
+        content_type=None,
+        usage=None,
         freqs=[440.0],
         playback_id=0,
         fs=16000,
@@ -295,10 +285,11 @@ class AudioWorkerApp(AppInterface):
             "amplitude": amp,
             "pcm-bit-width": bit_depth,
             "file": file,
-            "stream-type": stream_type,
-            "usage": usage,
-            "content-type": content_type,
         }
+        if content_type is not None:
+            configs["content-type"] = content_type
+        if usage is not None:
+            configs["usage"] = usage
         __class__.send_intent(device, serialno, name, configs)
 
     @staticmethod
