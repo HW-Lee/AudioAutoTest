@@ -7,6 +7,9 @@ This is a auto-testing framework of audio functions for Android devices.
 ## Release Note
 ### v1.6.x
 
+### v1.6.5
+- Fix version name in `__init__py`.
+
 ### v1.6.4
 - Update audioworker.apk (4329037-python-audio-autotest-v1.6.4)
   - audioworker: Add haptic playback and multi-channel amplitude support
