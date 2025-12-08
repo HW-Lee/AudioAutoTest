@@ -7,6 +7,10 @@ This is a auto-testing framework of audio functions for Android devices.
 ## Release Note
 ### v1.6.x
 
+### v1.6.6
+- update audioworker.apk (0bd38c6-python-audio-autotest-v1.6.6)
+  - add enable-ns and enable-aec in recording
+
 ### v1.6.5
 - Fix version name in `__init__py`.
 

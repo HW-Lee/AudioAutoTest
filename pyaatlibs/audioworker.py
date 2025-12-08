@@ -451,6 +451,8 @@ class AudioWorkerApp(AppInterface):
         api=None,
         dump_buffer_ms=1000,
         task_index=0,
+        enable_aec=False,
+        enable_ns=False,
     ):
         task_index = int(task_index)
         name = __class__.AUDIOWORKER_INTENT_PREFIX + "record.start"
@@ -464,6 +466,8 @@ class AudioWorkerApp(AppInterface):
             "audio-api": int(api) if api is not None else api,
             "dump-buffer-ms": dump_buffer_ms,
             "task-index": task_index,
+            "enable-aec": enable_aec,
+            "enable-ns": enable_ns,
         }
         __class__.send_intent(device, serialno, name, configs)
 
